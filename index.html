@@ -51,18 +51,107 @@
         .schedule-list { display: none; margin-top: 15px; background: #111; padding: 15px; border-radius: 8px; font-size: 0.9rem; border-left: 4px solid var(--f1); }
         .schedule-list.show { display: block; }
         .session { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; }
+        .pit-wall {
+    background: #0a0a0a;
+    border: 2px solid #222;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 600px;
+    margin: 30px auto;
+    box-shadow: 0 0 20px rgba(225, 6, 0, 0.2);
+    text-align: center;
+}
+
+.pit-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #222;
+    padding-bottom: 10px;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    background: var(--f1);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--f1);
+    animation: pulse 2s infinite;
+}
+
+.session-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #888;
+}
+
+.telemetry-grid {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.data-pod {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    width: 80px;
+}
+
+.unit {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--white);
+    font-family: 'Courier New', monospace; /* Monospaced for that tech feel */
+}
+
+.label {
+    font-size: 0.6rem;
+    color: var(--f1);
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
     </style>
 </head>
 <body>
 
 <header>
-    <div class="status-badge" id="liveStatus">Status: Off-Season</div>
     <div class="logo">Supercar<span>pitstop</span></div>
 </header>
 
-<div class="countdown-bar">
-    <span>Next Race: <strong>Australian Grand Prix</strong> in </span>
-    <span id="timer">--d --h --m --s</span>
+<div class="pit-wall">
+    <div class="pit-header">
+        <span class="status-indicator"></span>
+        <span class="session-label">NEXT EVENT: AUSTRALIAN GP</span>
+    </div>
+    <div class="telemetry-grid">
+        <div class="data-pod">
+            <div class="unit" id="days">00</div>
+            <div class="label">DAYS</div>
+        </div>
+        <div class="data-pod">
+            <div class="unit" id="hours">00</div>
+            <div class="label">HRS</div>
+        </div>
+        <div class="data-pod">
+            <div class="unit" id="mins">00</div>
+            <div class="label">MINS</div>
+        </div>
+        <div class="data-pod">
+            <div class="unit" id="secs">00</div>
+            <div class="label">SECS</div>
+        </div>
+    </div>
 </div>
 <div class="main-nav">
     <div class="nav-link active" onclick="switchView('calendar')">Calendar</div>
@@ -186,32 +275,30 @@ function toggleSched(id) {
 
 render();
 
-function updateCountdown() {
+function updateGraphicCountdown() {
     const nextRace = new Date("March 8, 2026 00:00:00").getTime();
     const now = new Date().getTime();
     const diff = nextRace - now;
 
-    // Time calculations
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-    const timerEl = document.getElementById("timer");
-    const statusEl = document.getElementById("liveStatus");
-
-    if (diff > 0) {
-        timerEl.innerHTML = `${days}d ${hours}h ${mins}m ${secs}s`;
-    } else {
-        timerEl.innerHTML = "RACE WEEKEND STARTED";
-        statusEl.innerHTML = "Status: LIVE";
-        statusEl.classList.add("live");
+    if (diff <= 0) {
+        document.querySelector(".pit-wall").innerHTML = "<h2 style='color:var(--f1)'>LIGHTS OUT AND AWAY WE GO!</h2>";
+        return;
     }
+
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+    // Update each pod, adding leading zeros if under 10
+    document.getElementById("days").innerText = d < 10 ? "0" + d : d;
+    document.getElementById("hours").innerText = h < 10 ? "0" + h : h;
+    document.getElementById("mins").innerText = m < 10 ? "0" + m : m;
+    document.getElementById("secs").innerText = s < 10 ? "0" + s : s;
 }
 
-// Update every second
-setInterval(updateCountdown, 1000);
-updateCountdown();
+setInterval(updateGraphicCountdown, 1000);
+updateGraphicCountdown();
     
 </script>
 </body>
