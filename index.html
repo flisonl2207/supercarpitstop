@@ -256,7 +256,7 @@ function toggleSched(id) {
     el.classList.toggle('show');
 }
 
-// --- SLOW PAGE TURN CLOCK LOGIC ---
+// Initialize with -1 so the very first second triggers a 'change'
 let previousTime = { d: -1, h: -1, m: -1, s: -1 };
 
 function updateClock() {
@@ -282,6 +282,7 @@ function updateClock() {
 }
 
 function handlePageTurn(id, newValue, oldValue) {
+    // This check ensures we only flip when the number actually changes
     if (newValue === oldValue) return;
 
     const card = document.getElementById(`${id}-card`);
@@ -290,22 +291,25 @@ function handlePageTurn(id, newValue, oldValue) {
     const bottom = card.querySelector('.bottom-static');
     const formatted = newValue < 10 ? `0${newValue}` : newValue;
 
-    // Set the bottom layer to the new number (it is hidden behind the leaf)
+    // 1. Prepare the 'hidden' number that will be revealed
     bottom.innerText = formatted;
 
-    // Trigger the slow lift animation
+    // 2. Start the slow lift animation (bottom to up)
+    leaf.classList.remove('flipping'); // Reset first
+    void card.offsetWidth; // Trigger reflow to ensure animation restarts
     leaf.classList.add('flipping');
 
-    // After the animation finishes (0.8s), reset the layers
+    // 3. Sync the leaf and top halfway through or after the flip
     setTimeout(() => {
-        leaf.classList.remove('flipping');
         leaf.innerText = formatted;
         top.innerText = formatted;
-    }, 800);
+        leaf.classList.remove('flipping');
+    }, 800); // Match this to your CSS transition time
 }
 
 setInterval(updateClock, 1000);
 updateClock();
+    
 render();
 </script>
 </body>
