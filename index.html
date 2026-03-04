@@ -353,31 +353,6 @@ function toggleSched(id) {
 
 render();
 
-function updateGraphicCountdown() {
-    const nextRace = new Date("March 8, 2026 00:00:00").getTime();
-    const now = new Date().getTime();
-    const diff = nextRace - now;
-
-    if (diff <= 0) {
-        document.querySelector(".pit-wall").innerHTML = "<h2 style='color:var(--f1)'>LIGHTS OUT AND AWAY WE GO!</h2>";
-        return;
-    }
-
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-    // Update each pod, adding leading zeros if under 10
-    document.getElementById("days").innerText = d < 10 ? "0" + d : d;
-    document.getElementById("hours").innerText = h < 10 ? "0" + h : h;
-    document.getElementById("mins").innerText = m < 10 ? "0" + m : m;
-    document.getElementById("secs").innerText = s < 10 ? "0" + s : s;
-}
-
-setInterval(updateGraphicCountdown, 1000);
-updateGraphicCountdown();
-
     let previousTime = { d: 0, h: 0, m: 0, s: 0 };
 
 function updateFlipClock() {
