@@ -56,7 +56,15 @@
 <body>
 
 <header><div class="logo">Supercar<span>pitstop</span></div></header>
+<header>
+    <div class="status-badge" id="liveStatus">Status: Off-Season</div>
+    <div class="logo">Supercar<span>pitstop</span></div>
+</header>
 
+<div class="countdown-bar">
+    <span>Next Race: <strong>Australian Grand Prix</strong> in </span>
+    <span id="timer">--d --h --m --s</span>
+</div>
 <div class="main-nav">
     <div class="nav-link active" onclick="switchView('calendar')">Calendar</div>
     <div class="nav-link" onclick="switchView('news')">Latest News</div>
@@ -178,6 +186,34 @@ function toggleSched(id) {
 }
 
 render();
+
+function updateCountdown() {
+    const nextRace = new Date("March 8, 2026 00:00:00").getTime();
+    const now = new Date().getTime();
+    const diff = nextRace - now;
+
+    // Time calculations
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+    const timerEl = document.getElementById("timer");
+    const statusEl = document.getElementById("liveStatus");
+
+    if (diff > 0) {
+        timerEl.innerHTML = `${days}d ${hours}h ${mins}m ${secs}s`;
+    } else {
+        timerEl.innerHTML = "RACE WEEKEND STARTED";
+        statusEl.innerHTML = "Status: LIVE";
+        statusEl.classList.add("live");
+    }
+}
+
+// Update every second
+setInterval(updateCountdown, 1000);
+updateCountdown();
+    
 </script>
 </body>
 </html>
