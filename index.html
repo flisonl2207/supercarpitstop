@@ -256,7 +256,7 @@ function toggleSched(id) {
     el.classList.toggle('show');
 }
 
-// Initialize with -1 so the very first second triggers a 'change'
+// Set to -1 to force the first flip on load
 let previousTime = { d: -1, h: -1, m: -1, s: -1 };
 
 function updateClock() {
@@ -282,7 +282,6 @@ function updateClock() {
 }
 
 function handlePageTurn(id, newValue, oldValue) {
-    // This check ensures we only flip when the number actually changes
     if (newValue === oldValue) return;
 
     const card = document.getElementById(`${id}-card`);
@@ -291,20 +290,23 @@ function handlePageTurn(id, newValue, oldValue) {
     const bottom = card.querySelector('.bottom-static');
     const formatted = newValue < 10 ? `0${newValue}` : newValue;
 
-    // 1. Prepare the 'hidden' number that will be revealed
+    // 1. Set the bottom layer to the number we are about to reveal
     bottom.innerText = formatted;
 
-    // 2. Start the slow lift animation (bottom to up)
-    leaf.classList.remove('flipping'); // Reset first
-    void card.offsetWidth; // Trigger reflow to ensure animation restarts
+    // 2. FORCE REFLOW: This is the critical fix for seconds
+    leaf.classList.remove('flipping');
+    void leaf.offsetWidth; // This line forces the browser to reset the animation
+    
+    // 3. Start the slow lift (bottom to up)
     leaf.classList.add('flipping');
 
-    // 3. Sync the leaf and top halfway through or after the flip
+    // 4. Update the leaf and top layers once the page has flipped
     setTimeout(() => {
         leaf.innerText = formatted;
         top.innerText = formatted;
-        leaf.classList.remove('flipping');
-    }, 800); // Match this to your CSS transition time
+        // Optional: remove class here if you want it to stay flat until next change
+        leaf.classList.remove('flipping'); 
+    }, 800); 
 }
 
 setInterval(updateClock, 1000);
