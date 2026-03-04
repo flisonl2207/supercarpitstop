@@ -121,6 +121,77 @@
     50% { opacity: 0.3; }
     100% { opacity: 1; }
 }
+        .flip-clock-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 40px 20px;
+    background: #050505;
+    perspective: 1000px; /* Essential for 3D depth */
+}
+
+.flip-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.flip-card {
+    position: relative;
+    width: 80px;
+    height: 100px;
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: white;
+}
+
+/* Common styles for top and bottom halves */
+.flip-card .top, .flip-card .bottom {
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    text-align: center;
+}
+
+.flip-card .top {
+    top: 0;
+    border-radius: 8px 8px 0 0;
+    padding-top: 20px;
+    z-index: 2;
+}
+
+.flip-card .bottom {
+    bottom: 0;
+    border-radius: 0 0 8px 8px;
+    padding-top: -30px; /* Offset to align with top half */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 20px;
+    border-top: 1px solid #000; /* The "hinge" line */
+}
+
+/* Animation class to be triggered by JS */
+.flip-card.animate {
+    animation: flip-down 0.6s ease-in;
+}
+
+@keyframes flip-down {
+    0% { transform: rotateX(0deg); }
+    100% { transform: rotateX(-360deg); }
+}
+
+.flip-unit .label {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    color: var(--f1);
+    font-weight: 800;
+    letter-spacing: 2px;
+}
     </style>
 </head>
 <body>
@@ -129,30 +200,37 @@
     <div class="logo">Supercar<span>pitstop</span></div>
 </header>
 
-<div class="pit-wall">
-    <div class="pit-header">
-        <span class="status-indicator"></span>
-        <span class="session-label">NEXT EVENT: AUSTRALIAN GP</span>
+<div class="flip-clock-container">
+    <div class="flip-unit">
+        <div class="flip-card" id="days-card">
+            <div class="top">00</div>
+            <div class="bottom">00</div>
+        </div>
+        <div class="label">DAYS</div>
     </div>
-    <div class="telemetry-grid">
-        <div class="data-pod">
-            <div class="unit" id="days">00</div>
-            <div class="label">DAYS</div>
+    <div class="flip-unit">
+        <div class="flip-card" id="hours-card">
+            <div class="top">00</div>
+            <div class="bottom">00</div>
         </div>
-        <div class="data-pod">
-            <div class="unit" id="hours">00</div>
-            <div class="label">HRS</div>
+        <div class="label">HRS</div>
+    </div>
+    <div class="flip-unit">
+        <div class="flip-card" id="mins-card">
+            <div class="top">00</div>
+            <div class="bottom">00</div>
         </div>
-        <div class="data-pod">
-            <div class="unit" id="mins">00</div>
-            <div class="label">MINS</div>
+        <div class="label">MINS</div>
+    </div>
+    <div class="flip-unit">
+        <div class="flip-card" id="secs-card">
+            <div class="top">00</div>
+            <div class="bottom">00</div>
         </div>
-        <div class="data-pod">
-            <div class="unit" id="secs">00</div>
-            <div class="label">SECS</div>
-        </div>
+        <div class="label">SECS</div>
     </div>
 </div>
+    
 <div class="main-nav">
     <div class="nav-link active" onclick="switchView('calendar')">Calendar</div>
     <div class="nav-link" onclick="switchView('news')">Latest News</div>
@@ -299,6 +377,48 @@ function updateGraphicCountdown() {
 
 setInterval(updateGraphicCountdown, 1000);
 updateGraphicCountdown();
+
+    let previousTime = { d: 0, h: 0, m: 0, s: 0 };
+
+function updateFlipClock() {
+    const nextRace = new Date("March 8, 2026 00:00:00").getTime();
+    const now = new Date().getTime();
+    const diff = nextRace - now;
+
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+    const currentTime = { d, h, m, s };
+
+    // Update each unit and animate if the number changed
+    updateUnit('days', currentTime.d, previousTime.d);
+    updateUnit('hours', currentTime.h, previousTime.h);
+    updateUnit('mins', currentTime.m, previousTime.m);
+    updateUnit('secs', currentTime.s, previousTime.s);
+
+    previousTime = currentTime;
+}
+
+function updateUnit(id, newValue, oldValue) {
+    const card = document.getElementById(`${id}-card`);
+    const formattedValue = newValue < 10 ? `0${newValue}` : newValue;
+    
+    // Only animate if the value has actually changed
+    if (newValue !== oldValue) {
+        card.classList.remove('animate');
+        void card.offsetWidth; // Trigger reflow to restart animation
+        card.classList.add('animate');
+        
+        card.querySelectorAll('.top, .bottom').forEach(el => {
+            el.innerText = formattedValue;
+        });
+    }
+}
+
+setInterval(updateFlipClock, 1000);
+updateFlipClock();
     
 </script>
 </body>
